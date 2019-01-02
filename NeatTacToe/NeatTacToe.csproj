@@ -5,4 +5,12 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="SharpNeatLib" Version="2.4.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Players\" />
+  </ItemGroup>
+
 </Project>
