@@ -20,6 +20,8 @@ namespace NeatTacToe.Game
 
             for (int moveNum = 0; moveNum < 9 && winner == SquareTypes.N; moveNum++)
             {
+                Console.WriteLine($"+- Turn {moveNum+1} -+");
+
                 IPlayer curPlayer;
                 SquareTypes curSquareType;
 
@@ -42,9 +44,31 @@ namespace NeatTacToe.Game
 
                 if (moveNum > 3)
                     winner = game.GetWinner();
+
+                DisplayBoard(game.Board);
             }
 
             return winner;
+        }
+
+        private static void DisplayBoard(SquareTypes[,] board)
+        {
+            string a = board[0, 0] == SquareTypes.N ? " " : board[0, 0].ToString();
+            string b = board[0, 1] == SquareTypes.N ? " " : board[0, 1].ToString();
+            string c = board[0, 2] == SquareTypes.N ? " " : board[0, 2].ToString();
+            string d = board[1, 0] == SquareTypes.N ? " " : board[1, 0].ToString();
+            string e = board[1, 1] == SquareTypes.N ? " " : board[1, 1].ToString();
+            string f = board[1, 2] == SquareTypes.N ? " " : board[1, 2].ToString();
+            string g = board[2, 0] == SquareTypes.N ? " " : board[2, 0].ToString();
+            string h = board[2, 1] == SquareTypes.N ? " " : board[2, 1].ToString();
+            string i = board[2, 2] == SquareTypes.N ? " " : board[2, 2].ToString();
+            Console.WriteLine("+---+---+---+");
+            Console.WriteLine($"| {a} | {b} | {c} |");
+            Console.WriteLine("+---+---+---+");
+            Console.WriteLine($"| {d} | {e} | {f} |");
+            Console.WriteLine("+---+---+---+");
+            Console.WriteLine($"| {g} | {h} | {i} |");
+            Console.WriteLine("+---+---+---+");
         }
 
         public void ResetGame()
