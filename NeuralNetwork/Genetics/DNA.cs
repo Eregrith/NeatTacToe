@@ -13,6 +13,7 @@ namespace NeuralNetwork.Genetics
         }
 
         public List<double> Genes { get; set; }
+        public double Fitness { get; set; }
 
         public override string ToString() => String.Join("||", Genes);
     }

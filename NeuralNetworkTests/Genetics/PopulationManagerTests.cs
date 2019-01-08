@@ -4,6 +4,7 @@ using NeuralNetwork.Genetics;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -184,6 +185,136 @@ namespace NeuralNetworkTests.Genetics
                 .Should().BeEquivalentTo(
                     mum.Genes.Skip(firstSplitSize + secondSplitSize)
                 );
+        }
+
+        [Test]
+        public void GeneratePopulation_Should_Create_Given_Number_Of_Individuals_With_Given_Number_Of_Genes_Each_Between_One_And_Minus_One()
+        {
+            int individuals = 10;
+            int genesEach = 200;
+            PopulationManager populationManagerTested = GetPopulationManager();
+
+            populationManagerTested.GeneratePopulation(individuals, genesEach);
+
+            populationManagerTested.Population.Should().HaveCount(individuals);
+            populationManagerTested.Population.ForEach(p => p.Genes.Should().HaveCount(genesEach));
+            populationManagerTested.Population.ForEach(p => p.Genes.ForEach(g => g.Should().BeInRange(-1, 1)));
+        }
+
+        [Test]
+        public void NextGeneration_Should_Copy_Ten_Percent_Of_Population_With_Best_Fitness()
+        {
+            int individuals = 100;
+            int genesEach = 20;
+            PopulationManager populationManagerTested = GetPopulationManager();
+            populationManagerTested.GeneratePopulation(individuals, genesEach);
+            double fitness = 0;
+            populationManagerTested.Population.ForEach(dna => dna.Fitness = fitness++);
+            var oldPopulation = populationManagerTested.Population.ToList();
+            var best = oldPopulation.OrderByDescending(dna => dna.Fitness).Take(10).ToList();
+
+            populationManagerTested.NextGeneration();
+
+            populationManagerTested.Population.Should().Contain(best);
+        }
+
+        [Test]
+        public void NextGeneration_Should_Copy_At_Least_The_Individual_With_Best_Fitness()
+        {
+            int individuals = 5;
+            int genesEach = 20;
+            PopulationManager populationManagerTested = GetPopulationManager();
+            populationManagerTested.GeneratePopulation(individuals, genesEach);
+            double fitness = 0;
+            populationManagerTested.Population.ForEach(dna => dna.Fitness = fitness++);
+            var oldPopulation = populationManagerTested.Population.ToList();
+            var best = oldPopulation.OrderByDescending(dna => dna.Fitness).First();
+
+            populationManagerTested.NextGeneration();
+
+            populationManagerTested.Population.Should().Contain(best);
+        }
+
+        [Test]
+        public void NextGeneration_Should_Complete_Population_To_Reach_Same_Size_By_Combining_Best()
+        {
+            int individuals = 5;
+            int genesEach = 20;
+            MockRandomEnvironment.Setup(m => m.GetNextDouble(0, It.IsAny<double>())).Returns(0.1f);
+            PopulationManager populationManagerTested = GetPopulationManager();
+            populationManagerTested.GeneratePopulation(individuals, genesEach);
+            double fitness = 0;
+            populationManagerTested.Population.ForEach(dna => dna.Fitness = fitness++);
+
+            populationManagerTested.NextGeneration();
+
+            populationManagerTested.Population.Should().HaveCount(individuals);
+        }
+
+        [Test]
+        public void NextGeneration_Should_Set_Fitness_Of_Population_To_Zero()
+        {
+            int individuals = 5;
+            int genesEach = 20;
+            MockRandomEnvironment.Setup(m => m.GetNextDouble(0, It.IsAny<double>())).Returns(0.1f);
+            PopulationManager populationManagerTested = GetPopulationManager();
+            populationManagerTested.GeneratePopulation(individuals, genesEach);
+            double fitness = 0;
+            populationManagerTested.Population.ForEach(dna => dna.Fitness = fitness++);
+
+            populationManagerTested.NextGeneration();
+
+            populationManagerTested.Population.Select(i => i.Fitness).Should().OnlyContain(i => i == 0.0f);
+        }
+
+        [Test]
+        public void WriteToStream_Should_Write_All_Population_DNA_To_Given_Stream()
+        {
+            int individuals = 5;
+            int genesEach = 20;
+            MockRandomEnvironment.Setup(m => m.GetNextDouble(0, It.IsAny<double>())).Returns(0.1f);
+            PopulationManager populationManagerTested = GetPopulationManager();
+            populationManagerTested.GeneratePopulation(individuals, genesEach);
+            double fitness = 0;
+            populationManagerTested.Population.ForEach(dna => dna.Fitness = fitness++);
+            MemoryStream stream = new MemoryStream();
+
+            populationManagerTested.WriteToStream(stream);
+
+            stream.Position = 0;
+            using (StreamReader sr = new StreamReader(stream))
+            {
+                int currentIndividual = 0;
+                do
+                {
+                    string line = sr.ReadLine();
+                    string expectedLine = $"{populationManagerTested.Population[currentIndividual].Fitness}:{populationManagerTested.Population[currentIndividual].ToString()}";
+                    line.Should().Be(expectedLine);
+                    currentIndividual++;
+                }
+                while (currentIndividual < individuals);
+            }
+        }
+
+        [Test]
+        public void LoadFromStream_Should_Get_All_Population_DNA_From_Given_Stream()
+        {
+            int individuals = 5;
+            MockRandomEnvironment.Setup(m => m.GetNextDouble(0, It.IsAny<double>())).Returns(0.1f);
+            PopulationManager populationManagerTested = GetPopulationManager();
+            MemoryStream stream = new MemoryStream();
+            using (StreamWriter sw = new StreamWriter(stream, Encoding.UTF8, 1024, true))
+            {
+                for (int i = 0; i < individuals; i++)
+                {
+                    sw.WriteLine($"{i}:{i}:-1||1||-{i}||{i}");
+                }
+            }
+            stream.Position = 0;
+
+            populationManagerTested.LoadFromStream(stream);
+
+            populationManagerTested.Population.Should().HaveCount(individuals);
         }
     }
 }

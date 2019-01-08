@@ -8,32 +8,32 @@ namespace NeuralNetwork.Genetics
     {
         private readonly Random _rand;
 
-        private const double AdaptationChance = 0.10f;
+        private const double AdaptationChance = 0.02f;
 
         private const double FlipChance = 0.02f;
 
-        private const double InversionChance = 0.10f;
+        private const double InversionChance = 0.02f;
 
-        private const double ReplacementChance = 0.05f;
+        private const double ReplacementChance = 0.01f;
 
-        private const double SwapChance = 0.05f;
+        private const double SwapChance = 0.02f;
 
         public RandomEnvironment()
         {
             _rand = new Random(DateTime.Now.Millisecond);
         }
 
-        public bool DoesRecombinationOccur() => true;
+        public virtual bool DoesRecombinationOccur() => true;
 
-        public bool DoesAdaptationMutationOccur() => _rand.NextDouble() >= AdaptationChance;
+        public virtual bool DoesAdaptationMutationOccur() => _rand.NextDouble() >= AdaptationChance;
 
-        public bool DoesFlipMutationOccur() => _rand.NextDouble() >= FlipChance;
+        public virtual bool DoesFlipMutationOccur() => _rand.NextDouble() >= FlipChance;
 
-        public bool DoesInversionMutationOccur() => _rand.NextDouble() >= InversionChance;
+        public virtual bool DoesInversionMutationOccur() => _rand.NextDouble() >= InversionChance;
 
-        public bool DoesReplacementMutationOccur() => _rand.NextDouble() >= ReplacementChance;
+        public virtual bool DoesReplacementMutationOccur() => _rand.NextDouble() >= ReplacementChance;
 
-        public bool DoesSwapMutationOccur() => _rand.NextDouble() >= SwapChance;
+        public virtual bool DoesSwapMutationOccur() => _rand.NextDouble() >= SwapChance;
 
         public double GetNextDouble(double min, double max) => min + _rand.NextDouble() * (max - min);
 

@@ -13,14 +13,15 @@ namespace NeatTacToe.Game
             Board = new SquareTypes[3, 3];
         }
 
-        public static SquareTypes PlayGameToEnd(IPlayer xPlayer, IPlayer oPlayer)
+        public static Tuple<SquareTypes, int> PlayGameToEnd(IPlayer xPlayer, IPlayer oPlayer)
         {
             TicTacToeGame game = new TicTacToeGame();
             SquareTypes winner = SquareTypes.N;
 
-            for (int moveNum = 0; moveNum < 9 && winner == SquareTypes.N; moveNum++)
+            int moveNum;
+            for (moveNum = 0; moveNum < 9 && winner == SquareTypes.N; moveNum++)
             {
-                Console.WriteLine($"+- Turn {moveNum+1} -+");
+                //Console.WriteLine($"+- Turn {moveNum+1} -+");
 
                 IPlayer curPlayer;
                 SquareTypes curSquareType;
@@ -38,20 +39,21 @@ namespace NeatTacToe.Game
 
                 var move = curPlayer.GetMove(game.Board);
 
-                Debug.Assert(game.IsEmpty(move.X, move.Y), "Player tried to make an illegal move!");
-
-                game.Board[move.X, move.Y] = curSquareType;
+                if (game.IsEmpty(move.X, move.Y))
+                    game.Board[move.X, move.Y] = curSquareType;
+                //else
+                    //return new Tuple<SquareTypes, int>(curSquareType == SquareTypes.X ? SquareTypes.O : SquareTypes.X, moveNum);
 
                 if (moveNum > 3)
                     winner = game.GetWinner();
 
-                DisplayBoard(game.Board);
+                //DisplayBoard(game.Board);
             }
 
-            return winner;
+            return new Tuple<SquareTypes, int>(winner, moveNum);
         }
 
-        private static void DisplayBoard(SquareTypes[,] board)
+        public static void DisplayBoard(SquareTypes[,] board)
         {
             string a = board[0, 0] == SquareTypes.N ? " " : board[0, 0].ToString();
             string b = board[0, 1] == SquareTypes.N ? " " : board[0, 1].ToString();
